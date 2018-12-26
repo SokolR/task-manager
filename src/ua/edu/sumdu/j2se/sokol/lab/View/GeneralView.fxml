@@ -174,7 +174,7 @@
                                                 </DatePicker>
                                                 <Button fx:id="showBtn" mnemonicParsing="false" onAction="#calendarHandler" text="Show" GridPane.columnIndex="1" GridPane.rowIndex="3">
                                                     <GridPane.margin>
-                                                        <Insets left="97.0" top="7.0" />
+                                                        <Insets left="96.0" top="7.0" />
                                                     </GridPane.margin>
                                                 </Button>
                                             </children>

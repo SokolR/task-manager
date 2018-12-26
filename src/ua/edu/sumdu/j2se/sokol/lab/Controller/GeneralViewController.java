@@ -3,45 +3,40 @@ package ua.edu.sumdu.j2se.sokol.lab.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import ua.edu.sumdu.j2se.sokol.lab.Model.Task;
-
-import java.time.LocalDate;
-import java.util.Locale;
 
 public class GeneralViewController {
     @FXML
-    public TableView<Task> tasksTable;
+    private TableView<Task> tasksTable;
     @FXML
-    public TableColumn<Task, String> startTimeColumn;
+    private TableColumn<Task, String> startTimeColumn;
     @FXML
-    public TableColumn<Task, String> endTimeColumn;
+    private TableColumn<Task, String> endTimeColumn;
     @FXML
-    public TableColumn<Task, String> titleColumn;
+    private TableColumn<Task, String> titleColumn;
 
     @FXML
-    public Label titleTask;
+    private Label titleTask;
     @FXML
-    public Label titleLabel;
+    private Label titleLabel;
     @FXML
-    public Label startTimeLabel;
+    private Label startTimeLabel;
     @FXML
-    public Label endTimeLabel;
+    private Label endTimeLabel;
     @FXML
-    public Label repeatLabel;
+    private Label repeatLabel;
     @FXML
-    public Label activityLabel;
+    private Label activityLabel;
 
     @FXML
-    public DatePicker calendarTaskStartDatePiker;
+    DatePicker calendarTaskStartDatePiker;
     @FXML
-    public DatePicker calendarTaskEndDatePiker;
+    DatePicker calendarTaskEndDatePiker;
     @FXML
-    public Button showBtn;
+    Button showBtn;
 
     @FXML
     private void initialize() {
-
     }
 
     public void calendarHandler(ActionEvent actionEvent) {
