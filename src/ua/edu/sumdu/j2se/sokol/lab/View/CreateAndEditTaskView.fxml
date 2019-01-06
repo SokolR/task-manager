@@ -25,7 +25,7 @@
         <RowConstraints maxHeight="210.0" minHeight="10.0" prefHeight="11.0" vgrow="SOMETIMES" />
     </rowConstraints>
     <children>
-        <Button fx:id="btnNewTaskOk" mnemonicParsing="false" onAction="#handleOk" prefHeight="30.0" prefWidth="70.0" text="Ok" GridPane.columnIndex="2" GridPane.rowIndex="1">
+        <Button fx:id="btnNewTaskOk" mnemonicParsing="false" onAction="#handleOk" prefHeight="30.0" prefWidth="70.0" text="OK" GridPane.columnIndex="2" GridPane.rowIndex="1">
             <font>
                 <Font size="14.0" />
             </font>
