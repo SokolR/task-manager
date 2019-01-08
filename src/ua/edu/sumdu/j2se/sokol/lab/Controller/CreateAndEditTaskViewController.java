@@ -91,7 +91,7 @@ public class CreateAndEditTaskViewController {
 
         chkBoxActive.setSelected(false);
 
-        datePikedDateStart.setValue(null);
+        datePikedDateStart.setValue(task.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         choiceBoxHoursStart.setValue("00");
         choiceBoxMinutesStart.setValue("00");
 
@@ -117,6 +117,7 @@ public class CreateAndEditTaskViewController {
             datePikedDateEnd.setValue(task.getEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             choiceBoxHoursEnd.setValue(DateUtil.choiceBoxTime(task.getEndTime().getHours()));
             choiceBoxMinutesEnd.setValue(DateUtil.choiceBoxTime(task.getEndTime().getMinutes()));
+            repeatTime.setText(DateUtil.secondsToStringTime(task.getRepeatInterval()));
         } else {
             choiceBoxHoursEnd.setValue("00");
             choiceBoxMinutesEnd.setValue("00");
@@ -152,6 +153,10 @@ public class CreateAndEditTaskViewController {
                 Integer endMinute = Integer.parseInt(choiceBoxMinutesEnd.getValue()) * 60 * 1000;
 
                 Date endDate = new Date(endDay + endHour + endMinute);
+
+                task.setTime(startDate, endDate, repeatInterval);
+            } else {
+                task.setTime(startDate);
             }
 
             okClicked = true;
@@ -172,8 +177,7 @@ public class CreateAndEditTaskViewController {
             if (textFieldTitle.getText() == null || textFieldTitle.getText().isEmpty() || textFieldTitle.getText().matches("\\s+")) {
                 throw new IllegalArgumentException("No valid title");
             }
-            if (datePikedDateStart.getValue() == null || datePikedDateStart.getValue().isBefore(DateUtil.dateToLaocalDate(new Date(0)))
-                    || datePikedDateStart.getValue().isAfter(datePikedDateEnd.getValue())) {
+            if (datePikedDateStart.getValue() == null || datePikedDateStart.getValue().isBefore(DateUtil.dateToLaocalDate(new Date(0)))) {
                 throw new IllegalArgumentException("Incorrect start date!");
             } else {
                 start = datePikedDateStart.getValue();

@@ -4,8 +4,11 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import ua.edu.sumdu.j2se.sokol.lab.MainApp;
 import ua.edu.sumdu.j2se.sokol.lab.Model.Task;
+import ua.edu.sumdu.j2se.sokol.lab.Model.TaskIO;
 import ua.edu.sumdu.j2se.sokol.lab.Util.DateUtil;
 
 import java.time.LocalDate;
@@ -44,6 +47,8 @@ public class GeneralViewController {
 
     public GeneralViewController() {
     }
+
+    private final Logger log = LogManager.getLogger(GeneralViewController.class.getSimpleName());
     
     @FXML
     private void initialize() {
@@ -67,7 +72,6 @@ public class GeneralViewController {
             titleLabel.setText(task.getTitle());
             startTimeLabel.setText(DateUtil.format(task.getStartTime()));
             repeatLabel.setText(DateUtil.secondsToStringTime(task.getRepeatInterval()));
-
             if (task.getRepeatInterval() != 0) {
                 endTimeLabel.setText(DateUtil.format(task.getEndTime()));
             } else {
@@ -85,7 +89,14 @@ public class GeneralViewController {
     }
 
     public void calendarHandler(ActionEvent actionEvent) {
-        mainApp.showCalendarWindow();
+        Date startTime = DateUtil.localDateToDate(calendarTaskStartDatePiker.getValue().atTime(0, 0, 0));
+        Date endTime = DateUtil.localDateToDate(calendarTaskEndDatePiker.getValue().atTime(23, 59, 59));
+        if (startTime != null && endTime != null && endTime.compareTo(startTime) > 0) {
+            mainApp.showCalendarWindow(startTime, endTime);
+            log.info("Calendar show");
+        } else {
+            log.info("Wrong calendar data");
+        }
     }
 
     public void newTaskHandler(ActionEvent actionEvent) {
@@ -95,15 +106,46 @@ public class GeneralViewController {
             mainApp.getTasksData().add(tempTask);
             MainApp.getTask().add(tempTask);
             showTaskDetails(tempTask);
+            log.info("Create task: " + tempTask);
         }
     }
 
     public void editTaskHandler(ActionEvent actionEvent) {
+        Task selectedTask = tasksTable.getSelectionModel().getSelectedItem();
+        if (selectedTask != null) {
+            boolean okClicked = mainApp.showCreateAndEditWindow(selectedTask, false);
+            if (okClicked) {
+                tasksTable.getColumns().get(0).setVisible(false);
+                tasksTable.getColumns().get(0).setVisible(true);
+                showTaskDetails(selectedTask);
+                log.info("Task " + selectedTask.getTitle().toString() + " was changed");
+            }
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(mainApp.getPrimaryStage());
+            alert.setTitle("ERROR");
+            alert.setHeaderText("No task selected");
+            alert.setContentText("Select task in the table");
+
+            alert.showAndWait();
+        }
     }
 
     public void deleteTaskHandler(ActionEvent actionEvent) {
         int selectIndex = tasksTable.getSelectionModel().getSelectedIndex();
-        tasksTable.getItems().remove(selectIndex);
+        if (selectIndex >= 0) {
+            Task tempTask = tasksTable.getItems().get(selectIndex);
+            MainApp.getTask().remove(tempTask);
+            tasksTable.getItems().remove(selectIndex);
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.initOwner(mainApp.getPrimaryStage());
+            alert.setTitle("ERROR");
+            alert.setHeaderText("No task selected");
+            alert.setContentText("Select task in the table!");
+
+            alert.showAndWait();
+        }
     }
 
 }

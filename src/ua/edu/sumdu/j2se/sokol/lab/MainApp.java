@@ -12,6 +12,9 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import ua.edu.sumdu.j2se.sokol.lab.Controller.CalendarViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.CreateAndEditTaskViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.GeneralViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Model.LinkedTaskList;
@@ -24,6 +27,7 @@ import java.io.IOException;
 import java.util.Date;
 
 public class MainApp extends Application {
+    private final Logger log = LogManager.getLogger(MainApp.class.getSimpleName());
     private static TaskList tasks = new LinkedTaskList();
     private ObservableList<Task> tasksData = FXCollections.observableArrayList();
     public static final File DATABASE = new File("resources/database");
@@ -47,6 +51,8 @@ public class MainApp extends Application {
         this.primaryStage.setMinWidth(750);
         this.primaryStage.setMinHeight(500);
 
+        log.info("Program Open");
+
         initRootLayout();
 
         this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
@@ -54,6 +60,7 @@ public class MainApp extends Application {
             public void handle(WindowEvent event) {
                 writeInDataBase();
                 exit = true;
+                log.info("Program Close");
             }
         });
     }
@@ -67,6 +74,7 @@ public class MainApp extends Application {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            log.catching(e);
         }
     }
 
@@ -84,6 +92,7 @@ public class MainApp extends Application {
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
+            log.catching(e);
         }
     }
 
@@ -120,11 +129,12 @@ public class MainApp extends Application {
             return controller.isOkClicked();
         } catch (IOException e) {
             e.printStackTrace();
+            log.catching(e);
             return false;
         }
     }
 
-    public void showCalendarWindow() {
+    public void showCalendarWindow(Date startTime, Date endTime) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("View/CalendarView.fxml"));
@@ -138,9 +148,14 @@ public class MainApp extends Application {
             Scene scene = new Scene(page);
             dialogStage.setScene(scene);
 
+            CalendarViewController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setDates(startTime, endTime);
+
             dialogStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
+            log.catching(e);
         }
     }
 
@@ -153,6 +168,7 @@ public class MainApp extends Application {
             TaskIO.writeBinary(tasks, DATABASE);
         } catch (IOException e) {
             e.printStackTrace();
+            log.catching(e);
         }
     }
 

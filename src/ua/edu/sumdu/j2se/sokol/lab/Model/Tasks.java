@@ -3,8 +3,6 @@ package ua.edu.sumdu.j2se.sokol.lab.Model;
 import java.util.*;
 
 public class Tasks {
-    private static final int NUMBER = 1000;
-
     public static Iterable<Task> incoming(Iterable<Task> tasks, Date start, Date end) {
 
         Set<Task> incom = new LinkedHashSet<Task>();
@@ -20,25 +18,19 @@ public class Tasks {
     }
 
     public static SortedMap<Date, Set<Task>> calendar(Iterable<Task> tasks, Date start, Date end) {
-
-        SortedMap<Date, Set<Task>> map = new TreeMap<Date, Set<Task>>();
-        Iterator it = tasks.iterator();
-        while (it.hasNext()) {
-            Task bfr = (Task)it.next();
-            for (Date date = bfr.getStartTime(); date.compareTo(bfr.getEndTime()) <= 0;) {
-                if (date.after(start) && date.compareTo(end) <= 0) {
-                    if (map.get(date) != null) {
-                        Set<Task> copy = map.get(date);
-                        copy.add(bfr);
-                        map.put(date, copy);
-                    }
-                    else {
-                        Set<Task> tmp = new LinkedHashSet<Task>();
-                        tmp.add(bfr);
-                        map.put(date, tmp);
-                    }
+        TreeMap<Date, Set<Task>> map = new TreeMap<Date, Set<Task>>();
+        Iterable<Task> it = incoming(tasks, start, end);
+        for (Task task : it) {
+            Date date = task.nextTimeAfter(start);
+            while(date != null && date.compareTo(end) <= 0) {
+                if (map.containsKey(date)) {
+                    map.get(date).add(task);
+                } else {
+                    Set<Task> tmp = new HashSet<Task>();
+                    tmp.add(task);
+                    map.put(date, tmp);
                 }
-                date = new Date(date.getTime() + bfr.getRepeatInterval() * NUMBER);
+                date = task.nextTimeAfter(date);
             }
         }
         return map;
