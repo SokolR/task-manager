@@ -1,6 +1,7 @@
 package ua.edu.sumdu.j2se.sokol.lab;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
@@ -17,10 +18,8 @@ import org.apache.logging.log4j.Logger;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.CalendarViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.CreateAndEditTaskViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.GeneralViewController;
-import ua.edu.sumdu.j2se.sokol.lab.Model.LinkedTaskList;
-import ua.edu.sumdu.j2se.sokol.lab.Model.Task;
-import ua.edu.sumdu.j2se.sokol.lab.Model.TaskIO;
-import ua.edu.sumdu.j2se.sokol.lab.Model.TaskList;
+import ua.edu.sumdu.j2se.sokol.lab.Controller.NotificationViewController;
+import ua.edu.sumdu.j2se.sokol.lab.Model.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +28,14 @@ import java.util.Date;
 public class MainApp extends Application {
     private final Logger log = LogManager.getLogger(MainApp.class.getSimpleName());
     private static TaskList tasks = new LinkedTaskList();
+    private static ArrayTaskList arrayTaskList = new ArrayTaskList();
     private ObservableList<Task> tasksData = FXCollections.observableArrayList();
     public static final File DATABASE = new File("resources/database");
     private boolean exit = false;
+
+    public static ArrayTaskList getArrayTaskList() {
+        return arrayTaskList;
+    }
 
     public ObservableList<Task> getTasksData() {
         return tasksData;
@@ -46,6 +50,8 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        final Thread currentThread = Thread.currentThread();
+
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Task Manager");
         this.primaryStage.setMinWidth(750);
@@ -55,6 +61,27 @@ public class MainApp extends Application {
 
         initRootLayout();
 
+        Thread notify = new Thread(new Notificator(primaryStage));
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!NotificationViewController.okClicked) {
+                    Platform.runLater(notify);
+                    try {
+                        Thread.sleep(5000000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        log.catching(e);
+                    }
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+        System.out.println("thread " + thread);
+
+
         this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
             public void handle(WindowEvent event) {
@@ -63,6 +90,12 @@ public class MainApp extends Application {
                 log.info("Program Close");
             }
         });
+    }
+
+
+
+    public boolean isExit () {
+        return exit;
     }
 
     public MainApp() {
@@ -158,6 +191,34 @@ public class MainApp extends Application {
             log.catching(e);
         }
     }
+//
+//    public void showNotification() {
+//        try {
+//            FXMLLoader loader = new FXMLLoader();
+//            loader.setLocation(MainApp.class.getResource("View/NotificationView.fxml"));
+//
+//            GridPane page = loader.load();
+//
+//            Stage dialogStage = new Stage();
+//            dialogStage.setTitle("Notification");
+//            dialogStage.initModality(Modality.WINDOW_MODAL);
+//            dialogStage.initOwner(primaryStage);
+//            Scene scene = new Scene(page);
+//            dialogStage.setScene(scene);
+//
+//            NotificationViewController controller = loader.getController();
+//            controller.setDialogStage(dialogStage);
+//            controller.nearestTasks(tasks);
+//
+//
+//            if (!dialogStage.isShowing()) {
+//                dialogStage.showAndWait();
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            log.catching(e);
+//        }
+//    }
 
     public Stage getPrimaryStage() {
         return primaryStage;

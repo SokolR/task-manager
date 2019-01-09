@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ua.edu.sumdu.j2se.sokol.lab.MainApp;
 import ua.edu.sumdu.j2se.sokol.lab.Model.Task;
-import ua.edu.sumdu.j2se.sokol.lab.Model.TaskIO;
 import ua.edu.sumdu.j2se.sokol.lab.Util.DateUtil;
 
 import java.time.LocalDate;
@@ -93,7 +92,7 @@ public class GeneralViewController {
         Date endTime = DateUtil.localDateToDate(calendarTaskEndDatePiker.getValue().atTime(23, 59, 59));
         if (startTime != null && endTime != null && endTime.compareTo(startTime) > 0) {
             mainApp.showCalendarWindow(startTime, endTime);
-            log.info("Calendar show");
+            log.info("Calendar show from " + startTime + " to " + endTime);
         } else {
             log.info("Wrong calendar data");
         }
@@ -106,7 +105,7 @@ public class GeneralViewController {
             mainApp.getTasksData().add(tempTask);
             MainApp.getTask().add(tempTask);
             showTaskDetails(tempTask);
-            log.info("Create task: " + tempTask);
+            log.info("Create task: " + tempTask.getTitle());
         }
     }
 
