@@ -16,6 +16,7 @@ public class Notificator implements Runnable {
     private static Window node;
     private Stage dialogStage;
     private MainApp mainApp;
+    private long notifyPeriod = 50000;
 
 
     public Notificator(Stage dialogStage) {
@@ -32,12 +33,15 @@ public class Notificator implements Runnable {
 
     @Override
     public void run() {
-
         while (dialogStage.isShowing()) {
             Date currentTime = new Date();
-            ArrayTaskList incomingTasks = (ArrayTaskList) Tasks.incoming(MainApp.getArrayTaskList(), new Date( ), new Date(currentTime.getTime()));
+            ArrayTaskList incomingTasks = (ArrayTaskList) Tasks.incoming(MainApp.getArrayTaskList(), new Date( ), new Date(currentTime.getTime() + notifyPeriod));
             if (incomingTasks != null) {
-                showNotification(incomingTasks);
+                try {
+                    showNotification(incomingTasks);
+                } catch (Exception e) {
+
+                }
             }
         }
     }

@@ -66,16 +66,18 @@ public class MainApp extends Application {
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while (!NotificationViewController.okClicked) {
+                while (!NotificationViewController.okIsClicked()) {
+                    System.out.println("thread " + notify);
+
                     Platform.runLater(notify);
                     try {
                         Thread.sleep(5000000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         log.catching(e);
-                    } if (currentThread.isInterrupted()) {
-                        notify.interrupt();
                     }
+                } if (currentThread.isInterrupted()) {
+                    notify.interrupt();
                 }
             }
         });
@@ -93,8 +95,6 @@ public class MainApp extends Application {
             }
         });
     }
-
-
 
     public boolean isExit () {
         return exit;

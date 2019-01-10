@@ -18,6 +18,9 @@ public class NotificationViewController {
     @FXML
     private Label msgLabel;
 
+    public static boolean okIsClicked() {
+        return okClicked;
+    }
     public void nearestTasks(TaskList tasks) {
         Date currentTime = new Date();
         if (tasks.size() != 0) {
