@@ -73,6 +73,8 @@ public class MainApp extends Application {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                         log.catching(e);
+                    } if (currentThread.isInterrupted()) {
+                        notify.interrupt();
                     }
                 }
             }
