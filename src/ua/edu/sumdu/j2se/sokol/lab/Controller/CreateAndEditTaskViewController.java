@@ -1,6 +1,5 @@
 package ua.edu.sumdu.j2se.sokol.lab.Controller;
 
-import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -12,9 +11,7 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class CreateAndEditTaskViewController {
@@ -25,13 +22,13 @@ public class CreateAndEditTaskViewController {
     @FXML
     public DatePicker datePikedDateStart;
     @FXML
-    public ChoiceBox<String> choiceBoxHoursStart;
+    public Spinner<Integer> choiceBoxHoursStart;
     @FXML
-    public ChoiceBox<String> choiceBoxMinutesStart;
+    public Spinner<Integer> choiceBoxMinutesStart;
     @FXML
-    public ChoiceBox<String> choiceBoxMinutesEnd;
+    public Spinner<Integer> choiceBoxMinutesEnd;
     @FXML
-    public ChoiceBox<String> choiceBoxHoursEnd;
+    public Spinner<Integer> choiceBoxHoursEnd;
     @FXML
     public DatePicker datePikedDateEnd;
     @FXML
@@ -43,47 +40,46 @@ public class CreateAndEditTaskViewController {
     private Task task;
     private boolean okClicked = false;
 
-    static final List<String > HOURS = new ArrayList<>();
-    static final List<String> MINUTES = new ArrayList<>();
+
+    final int initValue = 00;
+
+    SpinnerValueFactory<Integer> startHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, initValue);
+    SpinnerValueFactory<Integer> startMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, initValue);
+    SpinnerValueFactory<Integer> endHours = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 23, initValue);
+    SpinnerValueFactory<Integer> endMinutes = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 59, initValue);
 
     public Task getTask() {
         return task;
     }
 
+    /**
+     * Инициализация класса-контроллера. Этот метод вызывается автоматически
+     * после того, как fxml-файл будет загружен.
+     */
     @FXML
     private void initialize() {
         Locale.setDefault(Locale.ENGLISH);
-        if (HOURS.isEmpty()) {
-            for (int i = 0; i < 24; i++) {
-                if (i < 10) {
-                    HOURS.add("0" + i);
-                } else {
-                    HOURS.add("" + i);
-                }
-            }
-        }
 
-        if (MINUTES.isEmpty()) {
-            for (int i = 0; i < 60; i++) {
+        choiceBoxHoursStart.setValueFactory(startHours);
+        choiceBoxHoursStart.setEditable(true);
+        choiceBoxMinutesStart.setValueFactory(startMinutes);
+        choiceBoxMinutesStart.setEditable(true);
 
-                if (i < 10) {
-                    MINUTES.add("0" + i);
-                } else
-                    MINUTES.add("" + i);
-            }
-        }
-
-        choiceBoxHoursStart.setItems(FXCollections.observableArrayList(HOURS));
-        choiceBoxMinutesStart.setItems(FXCollections.observableArrayList(MINUTES));
-
-        choiceBoxHoursEnd.setItems(FXCollections.observableArrayList(HOURS));
-        choiceBoxMinutesEnd.setItems(FXCollections.observableArrayList(MINUTES));
+        choiceBoxHoursEnd.setValueFactory(endHours);
+        choiceBoxHoursEnd.setEditable(true);
+        choiceBoxMinutesEnd.setValueFactory(endMinutes);
+        choiceBoxMinutesEnd.setEditable(true);
     }
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
 
+    /**
+     * Задает новую задачу
+     *
+     * @param task - задача
+     */
     public void setNewTask(Task task) {
         this.task = task;
 
@@ -92,16 +88,21 @@ public class CreateAndEditTaskViewController {
         chkBoxActive.setSelected(false);
 
         datePikedDateStart.setValue(task.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        choiceBoxHoursStart.setValue("00");
-        choiceBoxMinutesStart.setValue("00");
+        choiceBoxHoursStart.setValueFactory(startHours);
+        choiceBoxMinutesStart.setValueFactory(startMinutes);
 
         datePikedDateEnd.setValue(null);
-        choiceBoxHoursEnd.setValue("00");
-        choiceBoxMinutesEnd.setValue("00");
+        choiceBoxHoursEnd.setValueFactory(endHours);
+        choiceBoxMinutesEnd.setValueFactory(endMinutes);
 
         repeatTime.setText("");
     }
 
+    /**
+     * Задает текующую задачу, для редактирования
+     *
+     * @param task - задача
+     */
     public void setTask(Task task) {
         this.task = task;
 
@@ -110,17 +111,17 @@ public class CreateAndEditTaskViewController {
         chkBoxActive.setSelected(task.isActive());
 
         datePikedDateStart.setValue(task.getStartTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        choiceBoxHoursStart.setValue(DateUtil.choiceBoxTime(task.getStartTime().getHours()));
-        choiceBoxMinutesStart.setValue(DateUtil.choiceBoxTime(task.getStartTime().getMinutes()));
+        choiceBoxHoursStart.setValueFactory(startHours);
+        choiceBoxMinutesStart.setValueFactory(startMinutes);
 
         if (task.isRepeated()) {
             datePikedDateEnd.setValue(task.getEndTime().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-            choiceBoxHoursEnd.setValue(DateUtil.choiceBoxTime(task.getEndTime().getHours()));
-            choiceBoxMinutesEnd.setValue(DateUtil.choiceBoxTime(task.getEndTime().getMinutes()));
+            choiceBoxHoursEnd.setValueFactory(endHours);
+            choiceBoxMinutesEnd.setValueFactory(endMinutes);
             repeatTime.setText(DateUtil.secondsToStringTime(task.getRepeatInterval()));
         } else {
-            choiceBoxHoursEnd.setValue("00");
-            choiceBoxMinutesEnd.setValue("00");
+            choiceBoxHoursEnd.setValueFactory(endHours);;
+            choiceBoxMinutesEnd.setValueFactory(endMinutes);;
         }
     }
 
@@ -128,6 +129,9 @@ public class CreateAndEditTaskViewController {
         return okClicked;
     }
 
+    /**
+     * Вызывается, когда пользователь кликнул по кнопке OK.
+     */
     public void handleOk(ActionEvent actionEvent) throws ParseException {
         if (isInputValid()) {
             int repeatInterval;
@@ -138,8 +142,8 @@ public class CreateAndEditTaskViewController {
             Instant startInstant = Instant.from(startLocalDate.atStartOfDay(ZoneId.systemDefault()));
 
             Long startDay = Date.from(startInstant).getTime();
-            Integer startHour = Integer.parseInt(choiceBoxHoursStart.getValue()) * 60 * 60 * 1000;
-            Integer startMinute = Integer.parseInt(choiceBoxMinutesStart.getValue()) * 60 * 1000;
+            Integer startHour = choiceBoxHoursStart.getValue() * 60 * 60 * 1000;
+            Integer startMinute = choiceBoxMinutesStart.getValue() * 60 * 1000;
 
             Date startDate = new Date(startDay + startHour + startMinute);
 
@@ -149,8 +153,8 @@ public class CreateAndEditTaskViewController {
                 Instant endInstant = Instant.from(endLocalDate.atStartOfDay(ZoneId.systemDefault()));
 
                 Long endDay = Date.from(endInstant).getTime();
-                Integer endHour = Integer.parseInt(choiceBoxHoursEnd.getValue()) * 60 * 60 * 1000;
-                Integer endMinute = Integer.parseInt(choiceBoxMinutesEnd.getValue()) * 60 * 1000;
+                Integer endHour = choiceBoxHoursEnd.getValue()* 60 * 60 * 1000;
+                Integer endMinute = choiceBoxMinutesEnd.getValue() * 60 * 1000;
 
                 Date endDate = new Date(endDay + endHour + endMinute);
 
@@ -164,10 +168,18 @@ public class CreateAndEditTaskViewController {
         }
     }
 
+    /**
+     * Вызывается, когда пользователь кликнул по кнопке Cancel.
+     */
     public void handleCancel(ActionEvent actionEvent) {
         dialogStage.close();
     }
 
+    /**
+     * Проверяет пользовательский ввод
+     *
+     * @return true, если пользовательский ввод корректен
+     */
     private boolean isInputValid() {
         String errorMsg = "";
         int rTime = 0;

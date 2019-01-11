@@ -30,6 +30,12 @@ public class CalendarViewController {
         this.dialogStage = dialogStage;
     }
 
+    /**
+     * Задает список задач в выбранный период времени
+     *
+     * @param startTime - начало периода
+     * @param endTime - конец периода
+     */
     public  void setDates(Date startTime, Date endTime) {
         SortedMap<Date, Set<Task>> tasks = Tasks.calendar(MainApp.getTask(), startTime, endTime);
 

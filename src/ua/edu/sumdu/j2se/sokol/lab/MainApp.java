@@ -27,15 +27,12 @@ import java.util.Date;
 
 public class MainApp extends Application {
     private final Logger log = LogManager.getLogger(MainApp.class.getSimpleName());
+    final Thread currentThread = Thread.currentThread();
     private static TaskList tasks = new LinkedTaskList();
-    private static ArrayTaskList arrayTaskList = new ArrayTaskList();
     private ObservableList<Task> tasksData = FXCollections.observableArrayList();
     public static final File DATABASE = new File("resources/database");
     private boolean exit = false;
 
-    public static ArrayTaskList getArrayTaskList() {
-        return arrayTaskList;
-    }
 
     public ObservableList<Task> getTasksData() {
         return tasksData;
@@ -48,9 +45,13 @@ public class MainApp extends Application {
     private Stage primaryStage;
     private VBox rootLayout;
 
+
+
+    /**
+     * Старт приложения.
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final Thread currentThread = Thread.currentThread();
 
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Task Manager");
@@ -60,31 +61,28 @@ public class MainApp extends Application {
         log.info("Program Open");
 
         initRootLayout();
+        showNotification();
 
-        Thread notify = new Thread(new Notificator(primaryStage));
+        Notificator notify = new Notificator(tasks, 600000, this);
+        notify.start();
 
-        Thread thread = new Thread(new Runnable() {
+        Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                while (!NotificationViewController.okIsClicked()) {
-                    System.out.println("thread " + notify);
-
-                    Platform.runLater(notify);
+               for (;;) {
+                    showNotification();
                     try {
-                        Thread.sleep(5000000);
+                        Thread.sleep(Notificator.PAUSE);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
-                        log.catching(e);
                     }
-                } if (currentThread.isInterrupted()) {
-                    notify.interrupt();
+                   if(currentThread.isInterrupted()) {
+                       currentThread.interrupt();
+                   }
                 }
             }
-        });
-        thread.setDaemon(true);
-        thread.start();
-        System.out.println("thread " + thread);
 
+        });
 
         this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -96,10 +94,17 @@ public class MainApp extends Application {
         });
     }
 
+    /**
+     * Метод для проверки закрытия программы
+     * @return exit - true, если программа закрвается
+     */
     public boolean isExit () {
         return exit;
     }
 
+    /**
+     * Конструктор по умолчанию
+     */
     public MainApp() {
         try {
             TaskIO.readBinary(tasks, DATABASE);
@@ -113,6 +118,9 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Инициализирует корневой макет.
+     */
     public void initRootLayout() {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -131,6 +139,12 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Открывает диалоговое окно для изменения деталей задачи.
+     *
+     * @param task - объект адресата, который надо изменить
+     * @return true, если пользователь кликнул OK, в противном случае false.
+     */
     public boolean showCreateAndEditWindow(Task task, boolean newTask) {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -169,6 +183,12 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Открывает диалоговое окно для просмотра календаря.
+     *
+     * @param startTime - начальная дата календаря
+     * @param endTime - конечная дата календаря
+     */
     public void showCalendarWindow(Date startTime, Date endTime) {
         try {
             FXMLLoader loader = new FXMLLoader();
@@ -193,39 +213,45 @@ public class MainApp extends Application {
             log.catching(e);
         }
     }
-//
-//    public void showNotification() {
-//        try {
-//            FXMLLoader loader = new FXMLLoader();
-//            loader.setLocation(MainApp.class.getResource("View/NotificationView.fxml"));
-//
-//            GridPane page = loader.load();
-//
-//            Stage dialogStage = new Stage();
-//            dialogStage.setTitle("Notification");
-//            dialogStage.initModality(Modality.WINDOW_MODAL);
-//            dialogStage.initOwner(primaryStage);
-//            Scene scene = new Scene(page);
-//            dialogStage.setScene(scene);
-//
-//            NotificationViewController controller = loader.getController();
-//            controller.setDialogStage(dialogStage);
-//            controller.nearestTasks(tasks);
-//
-//
-//            if (!dialogStage.isShowing()) {
-//                dialogStage.showAndWait();
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            log.catching(e);
-//        }
-//    }
 
+    /**
+     * Показывает диалоговое окно с сообщениями о ближайшей задаче.
+     */
+    public void showNotification() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(MainApp.class.getResource("View/NotificationView.fxml"));
+
+            GridPane page = loader.load();
+
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Notification");
+            dialogStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+
+            NotificationViewController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.nearestTasks(tasks);
+
+            dialogStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            log.catching(e);
+        }
+    }
+
+    /**
+     * Главное окно приложения
+     * @return - главное окно приложения
+     */
     public Stage getPrimaryStage() {
         return primaryStage;
     }
 
+    /**
+     * Запись задач в файл.
+     */
     private void writeInDataBase() {
         try {
             TaskIO.writeBinary(tasks, DATABASE);
@@ -235,6 +261,9 @@ public class MainApp extends Application {
         }
     }
 
+    /**
+     * Метод который запускает приложение
+     */
     public static void main(String[] args) {
         launch(args);
     }

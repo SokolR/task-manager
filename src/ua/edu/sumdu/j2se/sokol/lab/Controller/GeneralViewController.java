@@ -48,7 +48,11 @@ public class GeneralViewController {
     }
 
     private final Logger log = LogManager.getLogger(GeneralViewController.class.getSimpleName());
-    
+
+    /**
+     * Инициализация класса-контроллера. Этот метод вызывается автоматически
+     * после того, как fxml-файл будет загружен.
+     */
     @FXML
     private void initialize() {
         calendarTaskStartDatePiker.setValue(LocalDate.now());
@@ -60,12 +64,23 @@ public class GeneralViewController {
 
         tasksTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> showTaskDetails(newValue));
     }
-    
+
+    /**
+     * Вызывается главным приложением, которое даёт на себя ссылку.
+     *
+     * @param mainApp
+     */
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
         tasksTable.setItems(mainApp.getTasksData());
     }
 
+    /**
+     * Заполняет все текстовые поля.
+     * Если задача = null, то все текстовые поля очищаются.
+     *
+     * @param task — задача типа Task или null
+     */
     private void showTaskDetails(Task task) {
         if (task != null) {
             titleLabel.setText(task.getTitle());
@@ -87,6 +102,9 @@ public class GeneralViewController {
         }
     }
 
+    /**
+     * Заполняет календарь
+     */
     public void calendarHandler(ActionEvent actionEvent) {
         Date startTime = DateUtil.localDateToDate(calendarTaskStartDatePiker.getValue().atTime(0, 0, 0));
         Date endTime = DateUtil.localDateToDate(calendarTaskEndDatePiker.getValue().atTime(23, 59, 59));
@@ -98,6 +116,9 @@ public class GeneralViewController {
         }
     }
 
+    /**
+     * Добавление новой задачи
+     */
     public void newTaskHandler(ActionEvent actionEvent) {
         Task tempTask = new Task("default", new Date());
         boolean okClicked = mainApp.showCreateAndEditWindow(tempTask, true);
@@ -109,6 +130,9 @@ public class GeneralViewController {
         }
     }
 
+    /**
+     * Редактирование выбранной задачи
+     */
     public void editTaskHandler(ActionEvent actionEvent) {
         Task selectedTask = tasksTable.getSelectionModel().getSelectedItem();
         if (selectedTask != null) {
@@ -130,6 +154,9 @@ public class GeneralViewController {
         }
     }
 
+    /**
+     * Удаления выбранной задачи
+     */
     public void deleteTaskHandler(ActionEvent actionEvent) {
         int selectIndex = tasksTable.getSelectionModel().getSelectedIndex();
         if (selectIndex >= 0) {

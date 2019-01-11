@@ -18,9 +18,16 @@ public class NotificationViewController {
     @FXML
     private Label msgLabel;
 
-    public static boolean okIsClicked() {
-        return okClicked;
+    private Stage dialogStage;
+
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
     }
+
+    /**
+     * Выводит ближайщую задачу в диалоговое окно
+     * @param tasks - список задач
+     */
     public void nearestTasks(TaskList tasks) {
         Date currentTime = new Date();
         if (tasks.size() != 0) {
@@ -32,6 +39,9 @@ public class NotificationViewController {
         }
     }
 
+    /**
+     * Закрывает окно, по нажатию на кнопку ОК
+     */
     public void closeWindow(ActionEvent actionEvent) {
         Stage stage = (Stage) msgLabel.getScene().getWindow();
         okClicked = true;

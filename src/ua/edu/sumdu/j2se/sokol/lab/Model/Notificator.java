@@ -1,72 +1,46 @@
 package ua.edu.sumdu.j2se.sokol.lab.Model;
 
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.Window;
-import ua.edu.sumdu.j2se.sokol.lab.Controller.NotificationViewController;
-import ua.edu.sumdu.j2se.sokol.lab.MainApp;
 
-import java.io.IOException;
+import ua.edu.sumdu.j2se.sokol.lab.MainApp;
+import ua.edu.sumdu.j2se.sokol.lab.Util.DateUtil;
+
 import java.util.Date;
 
-public class Notificator implements Runnable {
-    private static Window node;
-    private Stage dialogStage;
-    private MainApp mainApp;
-    private long notifyPeriod = 50000;
 
+public class Notificator extends Thread {
 
-    public Notificator(Stage dialogStage) {
-        this.dialogStage = dialogStage;
-    }
+    MainApp mainApp;
+    private TaskList tasks;
+    private long notifyPeriod; //period when find lab 10 minutes
+    public static final int PAUSE = 120000;//5 minutes
 
-    public static void setNode(Window node) {
-        Notificator.node = node;
-    }
-
-    public static Window getNode() {
-        return node;
+    public Notificator(TaskList tasks, long notifyPeriod, MainApp mainApp) {
+        this.tasks = tasks;
+        this.notifyPeriod = notifyPeriod;
+        this.mainApp = mainApp;
+        setDaemon(true);
     }
 
     @Override
     public void run() {
-        while (dialogStage.isShowing()) {
-            Date currentTime = new Date();
-            ArrayTaskList incomingTasks = (ArrayTaskList) Tasks.incoming(MainApp.getArrayTaskList(), new Date( ), new Date(currentTime.getTime() + notifyPeriod));
-            if (incomingTasks != null) {
-                try {
-                    showNotification(incomingTasks);
-                } catch (Exception e) {
+        while (!mainApp.isExit()) {
 
+            Date currentTime = new Date();
+            TaskList incomingTasks = (TaskList) Tasks.incoming(tasks, currentTime, new
+                    Date(currentTime.getTime() + notifyPeriod));
+            if (incomingTasks != null) {
+                System.out.println("Nearest lab");
+                for (Task t : incomingTasks) {
+                    System.out.print("Time: " + DateUtil.format(t.nextTimeAfter(currentTime)));
+                    System.out.println(" " + t.getTitle());
                 }
             }
-        }
-    }
-
-    public void showNotification(TaskList tasks) {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("View/NotificationView.fxml"));
-
-            GridPane page = loader.load();
-
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Notification");
-            dialogStage.initModality(Modality.WINDOW_MODAL);
-            dialogStage.initOwner(Notificator.getNode());
-            Scene scene = new Scene(page);
-            dialogStage.setScene(scene);
-            NotificationViewController controller = loader.getController();
-            controller.nearestTasks(tasks);
-
-            if (!dialogStage.isShowing()) {
-                dialogStage.showAndWait();
+            try {
+                Thread.sleep(PAUSE);
+            } catch (InterruptedException e) {
+                System.out.println("Goodbye");
             }
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 }
+
