@@ -86,6 +86,7 @@ public class TaskIO {
             fos = new FileOutputStream(filename);
             write(tasks, fos);
         } finally {
+            fos.flush();
             fos.close();
         }
     }
