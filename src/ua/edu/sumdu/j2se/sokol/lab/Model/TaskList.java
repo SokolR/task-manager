@@ -34,23 +34,6 @@ public abstract class TaskList implements Iterable<Task>, Cloneable, Serializabl
     */
     public abstract Task getTask(int index);
 
-    /**
-    *@param from - from
-    *@param to - to
-    *@return incomingTasks
-    */
-//    public TaskList incoming(int from, int to) {
-//        TaskList incomingTasks = new ArrayTaskList();
-//        for (int i = 0; i < size(); i++) {
-//            Task task = getTask(i);
-//            int nextTime = task.nextTimeAfter(from);
-//            if (nextTime != -1 && nextTime <= to) {
-//                incomingTasks.add(task);
-//            }
-//        }
-//        return incomingTasks;
-//    }
-
     public int hashCode() {
         int code = NUMBER * size();
         for (int i = 0; i < size(); i++) {
