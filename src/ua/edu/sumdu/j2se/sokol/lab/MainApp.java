@@ -29,7 +29,7 @@ public class MainApp extends Application {
     final Thread currentThread = Thread.currentThread();
     private static TaskList tasks = new LinkedTaskList();
     private ObservableList<Task> tasksData = FXCollections.observableArrayList();
-    public static final File DATABASE = new File("src/main/resources/database");
+    public static final File DATABASE = new File("src/resources/database");
     private boolean exit = false;
 
 
@@ -130,7 +130,7 @@ public class MainApp extends Application {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(MainApp.class.getResource("View/GeneralView.fxml"));
-            rootLayout = loader.load();;
+            rootLayout = loader.load();
 
             GeneralViewController controller = loader.getController();
             controller.setMainApp(this);

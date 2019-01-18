@@ -29,7 +29,9 @@ public class Notificator implements Runnable {
         return node;
     }
 
-
+    /**
+     * Вызов окна с сообщение о ближайшей задаче
+     */
     public void run() {
         if (stages.isShowing()) {
                 try {
