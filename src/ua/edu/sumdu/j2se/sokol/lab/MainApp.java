@@ -18,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.CalendarViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.CreateAndEditTaskViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Controller.GeneralViewController;
-import ua.edu.sumdu.j2se.sokol.lab.Controller.NotificationViewController;
 import ua.edu.sumdu.j2se.sokol.lab.Model.*;
 
 import java.io.File;
@@ -30,7 +29,7 @@ public class MainApp extends Application {
     final Thread currentThread = Thread.currentThread();
     private static TaskList tasks = new LinkedTaskList();
     private ObservableList<Task> tasksData = FXCollections.observableArrayList();
-    public static final File DATABASE = new File("resources/database");
+    public static final File DATABASE = new File("src/resources/database");
     private boolean exit = false;
 
 
@@ -52,6 +51,7 @@ public class MainApp extends Application {
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
+        final Stage finalPrimaryStageCopy = primaryStage;
 
         this.primaryStage = primaryStage;
         this.primaryStage.setTitle("Task Manager");
@@ -61,28 +61,33 @@ public class MainApp extends Application {
         log.info("Program Open");
 
         initRootLayout();
-        showNotification();
 
-        Notificator notify = new Notificator(tasks, 600000, this);
-        notify.start();
+        Notificator.setNode(primaryStage.getOwner());
 
-        Platform.runLater(new Runnable() {
-            @Override
+        final Thread notify = new Thread(new Notificator(finalPrimaryStageCopy));
+
+        final Thread thread = new Thread(new Runnable() {
             public void run() {
-               for (;;) {
-                    showNotification();
+                try {
+                    Thread.sleep(12000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                while (primaryStage.isShowing()) {
+                    Platform.runLater(notify);
                     try {
-                        Thread.sleep(Notificator.PAUSE);
+                        Thread.sleep(120000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        e.getStackTrace();
                     }
-                   if(currentThread.isInterrupted()) {
-                       currentThread.interrupt();
-                   }
+                    if (currentThread.isInterrupted()) {
+                        notify.interrupt();
+                    }
                 }
             }
-
         });
+        thread.setDaemon(true);
+        thread.start();
 
         this.primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             @Override
@@ -113,8 +118,8 @@ public class MainApp extends Application {
                 tasksData.add(t);
             }
         } catch (IOException e) {
-            e.printStackTrace();
             log.catching(e);
+            log.info("Can't read task from null, need create file");
         }
     }
 
@@ -134,8 +139,8 @@ public class MainApp extends Application {
             primaryStage.setScene(scene);
             primaryStage.show();
         } catch (IOException e) {
-            e.printStackTrace();
             log.catching(e);
+            log.info("Error when loading root layout at initRootLayout()");
         }
     }
 
@@ -177,8 +182,8 @@ public class MainApp extends Application {
 
             return controller.isOkClicked();
         } catch (IOException e) {
-            e.printStackTrace();
             log.catching(e);
+            log.info("Error when loading create and edit layout at showCreateAndEditWindow()");
             return false;
         }
     }
@@ -209,35 +214,8 @@ public class MainApp extends Application {
 
             dialogStage.showAndWait();
         } catch (IOException e) {
-            e.printStackTrace();
             log.catching(e);
-        }
-    }
-
-    /**
-     * Показывает диалоговое окно с сообщениями о ближайшей задаче.
-     */
-    public void showNotification() {
-        try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("View/NotificationView.fxml"));
-
-            GridPane page = loader.load();
-
-            Stage dialogStage = new Stage();
-            dialogStage.setTitle("Notification");
-            dialogStage.initOwner(primaryStage);
-            Scene scene = new Scene(page);
-            dialogStage.setScene(scene);
-
-            NotificationViewController controller = loader.getController();
-            controller.setDialogStage(dialogStage);
-            controller.nearestTasks(tasks);
-
-            dialogStage.showAndWait();
-        } catch (IOException e) {
-            e.printStackTrace();
-            log.catching(e);
+            log.info("Error when loading calendar layout at showCalendarWindow()");
         }
     }
 
@@ -256,8 +234,8 @@ public class MainApp extends Application {
         try {
             TaskIO.writeBinary(tasks, DATABASE);
         } catch (IOException e) {
-            e.printStackTrace();
             log.catching(e);
+            log.info("Can't write task to null, need create file");
         }
     }
 

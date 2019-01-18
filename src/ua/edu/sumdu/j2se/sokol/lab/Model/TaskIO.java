@@ -99,7 +99,9 @@ public class TaskIO {
             fis = new FileInputStream(filename);
             read(tasks, fis);
         } finally {
-            fis.close();
+            if (fis != null) {
+                fis.close();
+            }
         }
     }
 
